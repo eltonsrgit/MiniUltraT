@@ -17,6 +17,7 @@ const int motor_dir_2 = 23;  //14
 
 DRV8833 motor(motor_esq_1, motor_esq_2, motor_dir_1, motor_dir_2);
 #include "SeekAndDestroy.h"  // Função de busca e destruição
+#include "Linha.h"
 
 
 SumoIR IR;

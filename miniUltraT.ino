@@ -3,13 +3,13 @@
 #include "SumoIR.h"
 #include "DRV8833.h"
 #include "sensoresIR.h"
-#include "ledFX.h"  // .h para efeitos de LED
+#include "ledFX.h"
 
 
 #define sensorReflex 14
 #define boot 0
 
-const int motor_esq_1 = 18;   //4 vespa
+const int motor_esq_1 = 18;   //4 *****pinos da vespa da robocore, caso seja necessário trocar a placa
 const int motor_esq_2 = 19;  //27
 const int motor_dir_1 = 4;  //13
 const int motor_dir_2 = 23;  //14
@@ -81,10 +81,7 @@ void loop(){
   }
   
 
-  if (!modoAutonomo) {
-    RC = true;
-
-  } else if (modoAutonomo) {
+   else if (modoAutonomo) {
     // Código autônomo
     RC = false;
 
@@ -154,22 +151,29 @@ void RadioControle() {
 
 void OnDataReceived(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
   // Check if the received data matches the size of the pacote struct
-  if (data_len == sizeof(pacote)) {
-    // Copy received data to the pack_rx structure
-    memcpy(&pack_rx, data, sizeof(pacote));
 
-    int x = map(pack_rx.ch[0], 1000, 2000, -1024, 1024);
-    int y = map(pack_rx.ch[1], 1000, 2000, -1024, 1024);
+  if (!modoAutonomo) {  // condição para iniciar o modo RC
+    RC = true;
+    pixels.clear();
+    ledLight(0, 150, 0);
 
-    int vel_esq = constrain( (-x + y ), -1024, 1024);
-    int vel_dir = constrain( ( x + y ), -1024, 1024);
+    if (data_len == sizeof(pacote)) {
+      // Copy received data to the pack_rx structure
+      memcpy(&pack_rx, data, sizeof(pacote));
 
-    motor.move(vel_esq, vel_dir);
+      int x = map(pack_rx.ch[0], 1000, 2000, -1024, 1024);
+      int y = map(pack_rx.ch[1], 1000, 2000, -1024, 1024);
 
-  
+      int vel_esq = constrain( (-x + y ), -1024, 1024);   // modificar as expressões dependendo das conexões dos pinos e dos motores
+      int vel_dir = constrain( ( x + y ), -1024, 1024);
+
+      motor.move(vel_esq, vel_dir);
+
+    
 
 
-  } else {
-    Serial.println("Received data with incorrect size");
+    } else {
+      Serial.println("Received data with incorrect size");
+    }
   }
 }
